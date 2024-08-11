@@ -21,6 +21,19 @@ def esta_na_semana_atual(data_str):
     # Verifica se a data fornecida está dentro do intervalo da semana atual
     return inicio_da_semana <= data <= fim_da_semana
     
+def esta_no_mes_atual(data_str):
+    # Converte a string para um objeto de data
+    data = datetime.strptime(data_str, '%d/%m/%Y')
+    
+    # Obtém o mês da data fornecida
+    mes_data = data.month
+    
+    # Obtém o mês atual
+    mes_atual = datetime.now().month
+    
+    # Verifica se o mês da data é o mês atual
+    return mes_data == mes_atual
+    
 def clear():
     sistema = platform.system()
     if sistema == "Windows":
@@ -31,6 +44,7 @@ def clear():
 VENDAS = 'vendas.txt'
 COMPRAS = 'compras.txt'
 RELATORIOS = 'relatorios.txt'
+
 def set_record(file_name,message):
     with open(file_name, 'a') as file:
         file.write(str(message))
@@ -98,7 +112,24 @@ def relatorioSemanal():
     receita = sum(float(x.split(';')[0]) for x in vendas)
     resultado = float(receita) - float(despesas)
     definicao = 'Lucro' if resultado >= 0 else 'Prejuízo' 
-    print('Receita total arrecadada nessa semana até agora =', receita,'\n' + 'Total de despesas dessa semana =', '\n',despesas, '\n' + definicao + '=', '{:.2f}'.format(resultado))
+    print('Receita total arrecadada nessa semana até agora =', receita,'\n' + 'Total de despesas dessa semana =', despesas, '\n' + definicao + '=', '{:.2f}'.format(resultado))
+    input('\nDigite Enter para continuar')
+
+def relatorioMensal():
+    clear()
+    vendas = list(get_record(VENDAS).split('\n'))
+    compras = list(get_record(COMPRAS).split('\n'))
+    for venda in vendas:
+        if not esta_na_semana_atual(venda.split(';')[1]):
+            vendas.remove(venda)
+    for compra in compras:
+        if not esta_no_mes_atual(compra.split(';')[1]):
+            compras.remove(compra)
+    despesas = sum(float(x.split(';')[0]) for x in compras)
+    receita = sum(float(x.split(';')[0]) for x in vendas)
+    resultado = float(receita) - float(despesas)
+    definicao = 'Lucro' if resultado >= 0 else 'Prejuízo' 
+    print('Receita total arrecadada nesse mês até agora =', receita,'\n' + 'Total de despesas desse mês =', despesas, '\n' + definicao + '=', '{:.2f}'.format(resultado))
     input('\nDigite Enter para continuar')
 
 while True:
@@ -117,4 +148,8 @@ while True:
         clear()
         setCompra()
     elif option == '3':
+        clear()
         relatorioSemanal()
+    elif option == '4':
+        clear()
+        relatorioMensal()
