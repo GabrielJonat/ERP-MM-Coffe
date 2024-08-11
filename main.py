@@ -73,7 +73,8 @@ def setVenda():
             hora_atual = agora.strftime("%d/%m/%Y")
             message = venda+';'+hora_atual if os.stat(VENDAS).st_size == 0 else '\n'+venda+';'+hora_atual
             set_record(VENDAS,message)
-            clear()
+            atualizar_historico('venda',float(venda), hora_atual.split('/')[1]+' '+hora_atual.split('/')[2])
+            #clear()
             input('\nVenda Cadastrada com sucesso! Digite Enter para continuar')
 
 def setCompra():
@@ -96,6 +97,7 @@ def setCompra():
             message = compra+';'+hora_atual if os.stat(COMPRAS).st_size == 0 else '\n'+compra+';'+hora_atual
             set_record(COMPRAS,message)
             clear()
+            atualizar_historico('compra',float(compra), hora_atual.split('/')[1]+' '+hora_atual.split('/')[2])
             input('\nCompra Cadastrada com sucesso! Digite Enter para continuar')
 
 def relatorioSemanal():
@@ -131,6 +133,39 @@ def relatorioMensal():
     definicao = 'Lucro' if resultado >= 0 else 'Prejuízo' 
     print('Receita total arrecadada nesse mês até agora =', receita,'\n' + 'Total de despesas desse mês =', despesas, '\n' + definicao + '=', '{:.2f}'.format(resultado))
     input('\nDigite Enter para continuar')
+
+def atualizar_historico(operacao, valor, data):
+    # Lê todas as linhas do arquivo
+    with open(RELATORIOS, 'r') as file:
+        linhas = file.readlines()
+    
+    if operacao == 'compra':
+        achou = False
+        for i in range(len(linhas)):
+            if data == linhas[i].split(';')[0]:
+                linha = linhas[i].split(';')
+                linha[1] = str(float(linhas[i].split(';')[1]) + valor)
+                linhas[i]= ';'.join(x for x in linha)
+                achou = True
+                break  # Remove este break se você quiser atualizar todas as ocorrências
+        if not achou:
+            linhas.append(data+';'+str(valor)+';'+'0.00')
+    elif operacao == 'venda':
+        achou = False
+        for i in range(len(linhas)):
+            if data == linhas[i].split(';')[0]:
+                linha = linhas[i].split(';')
+                linha[2] = str(float(linhas[i].split(';')[2]) + valor)
+                linhas[i]= ';'.join(x for x in linha)
+                achou = True
+                break  # Remove este break se você quiser atualizar todas as ocorrências
+        if not achou:
+            linhas.append(data+';'+'0.00'+';'+str(valor))
+    else:
+        return -1
+    with open(RELATORIOS, 'w') as file:
+        file.writelines(linhas)
+    return 0
 
 while True:
     clear()
