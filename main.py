@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import os
 import platform
+import pydoc
 
 def converter_para_datetime(data_str):
     return datetime.strptime(data_str, "%d/%m/%Y")
@@ -114,7 +115,7 @@ def relatorioSemanal():
     receita = sum(float(x.split(';')[0]) for x in vendas)
     resultado = float(receita) - float(despesas)
     definicao = 'Lucro' if resultado >= 0 else 'Prejuízo' 
-    print('Receita total arrecadada nessa semana até agora =', receita,'\n' + 'Total de despesas dessa semana =', despesas, '\n' + definicao + '=', '{:.2f}'.format(resultado))
+    print('Receita total arrecadada nessa semana até agora =', 'R${:.2f}'.format(receita),'\n' + 'Total de despesas dessa semana =', 'R${:.2f}'.format(despesas), '\n' + definicao + '=', 'R${:.2f}'.format(resultado))
     input('\nDigite Enter para continuar')
 
 def relatorioMensal():
@@ -131,7 +132,7 @@ def relatorioMensal():
     receita = sum(float(x.split(';')[0]) for x in vendas)
     resultado = float(receita) - float(despesas)
     definicao = 'Lucro' if resultado >= 0 else 'Prejuízo' 
-    print('Receita total arrecadada nesse mês até agora =', receita,'\n' + 'Total de despesas desse mês =', despesas, '\n' + definicao + '=', '{:.2f}'.format(resultado))
+    print('Receita total arrecadada nesse mês até agora =', 'R${:.2f}'.format(receita),'\n' + 'Total de despesas desse mês =', 'R${:.2f}'.format(despesas), '\n' + definicao + '=', 'R${:.2f}'.format(resultado))
     input('\nDigite Enter para continuar')
 
 def atualizar_historico(operacao, valor, data):
@@ -167,6 +168,23 @@ def atualizar_historico(operacao, valor, data):
         file.writelines(linhas)
     return 0
 
+def exibirHistorico(data=None):
+    clear()
+    registrosMensais = list(get_record(RELATORIOS).split('\n'))
+    linha = []
+    for registro in registrosMensais:
+        campos = registro.split(';')
+        mes = campos[0].split(' ')[0]
+        ano = campos[0].split(' ')[1]
+        despesas = float(campos[1])
+        receita = float(campos[2])
+        resultado = float(receita) - float(despesas)
+        definicao = 'Lucro' if resultado >= 0 else 'Prejuízo' 
+        linha.append('Receita total arrecadada  em ' + mes + '/' + ano + ' : ' + 'R$' + '{:.2f}'.format(receita) + '\n' + 'Total de despesas = '+ 'R$'+ '{:.2f}'.format(despesas) + '\n' + definicao + ': ' + 'R$' + '{:.2f}'.format(abs(resultado)))
+    exibir = '\n'.join(linha)
+    pydoc.pager(exibir)
+    input('\nDigite Enter para continuar')
+
 while True:
     clear()
     print('Bem Vindo ao ERP da MM Coffe, escolha uma opção abaixo:')
@@ -188,3 +206,6 @@ while True:
     elif option == '4':
         clear()
         relatorioMensal()
+    else:
+        clear()
+        exibirHistorico()
