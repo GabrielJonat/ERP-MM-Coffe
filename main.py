@@ -91,7 +91,7 @@ def setCompra():
     else:
         confirm = input('Tem certeza? digite 1 para confirmar o valor da venda ou qualquer outra tecla para alterar o valor: ')
         if confirm != '1':
-            setCOmpra()
+            setCompra()
         else:    
             agora = datetime.now()
             hora_atual = agora.strftime("%d/%m/%Y")
@@ -172,15 +172,27 @@ def exibirHistorico(data=None):
     clear()
     registrosMensais = list(get_record(RELATORIOS).split('\n'))
     linha = []
+    qntdLinhas = 0
     for registro in registrosMensais:
-        campos = registro.split(';')
-        mes = campos[0].split(' ')[0]
-        ano = campos[0].split(' ')[1]
-        despesas = float(campos[1])
-        receita = float(campos[2])
-        resultado = float(receita) - float(despesas)
-        definicao = 'Lucro' if resultado >= 0 else 'Prejuízo' 
-        linha.append('Receita total arrecadada  em ' + mes + '/' + ano + ' : ' + 'R$' + '{:.2f}'.format(receita) + '\n' + 'Total de despesas = '+ 'R$'+ '{:.2f}'.format(despesas) + '\n' + definicao + ': ' + 'R$' + '{:.2f}'.format(abs(resultado)))
+        if data != None:
+            if registro.split(';')[0] == data:
+                campos = registro.split(';')
+                mes = campos[0].split(' ')[0]
+                ano = campos[0].split(' ')[1]
+                despesas = float(campos[1])
+                receita = float(campos[2])
+                resultado = float(receita) - float(despesas)
+                definicao = 'Lucro' if resultado >= 0 else 'Prejuízo' 
+                linha.append('Receita total arrecadada  em ' + mes + '/' + ano + ' : ' + 'R$' + '{:.2f}'.format(receita) + '\n' + 'Total de despesas = '+ 'R$'+ '{:.2f}'.format(despesas) + '\n' + definicao + ': ' + 'R$' + '{:.2f}'.format(abs(resultado)))
+        else:
+            campos = registro.split(';')
+            mes = campos[0].split(' ')[0]
+            ano = campos[0].split(' ')[1]
+            despesas = float(campos[1])
+            receita = float(campos[2])
+            resultado = float(receita) - float(despesas)
+            definicao = 'Lucro' if resultado >= 0 else 'Prejuízo' 
+            linha.append('Receita total arrecadada  em ' + mes + '/' + ano + ' : ' + 'R$' + '{:.2f}'.format(receita) + '\n' + 'Total de despesas = '+ 'R$'+ '{:.2f}'.format(despesas) + '\n' + definicao + ': ' + 'R$' + '{:.2f}'.format(abs(resultado)))
     exibir = '\n'.join(linha)
     pydoc.pager(exibir)
     input('\nDigite Enter para continuar')
@@ -202,10 +214,27 @@ while True:
         setCompra()
     elif option == '3':
         clear()
-        relatorioSemanal()
+        if os.stat(VENDAS).st_size == 0 or os.stat(COMPRAS).st_size == 0:
+            print('\nRelatório Indisponível!')
+            input('\nDigite Enter para continuar')
+        else:
+            relatorioSemanal()
     elif option == '4':
         clear()
-        relatorioMensal()
+        if os.stat(VENDAS).st_size == 0 or os.stat(COMPRAS).st_size == 0:
+            print('\nRelatório Indisponível!')
+            input('\nDigite Enter para continuar')
+        else:
+            relatorioMensal()
     else:
         clear()
-        exibirHistorico()
+        if os.stat(RELATORIOS).st_size == 0:
+            print('\nRelatório Indisponível!')
+            input('\nDigite Enter para continuar')
+        else:
+            resp = input('Digite 1 para filtar por data ou qualquer outra tecla para exibir todos os registros: ')
+            if resp == '1':
+                data = input('Digite o mês e o ano para filtrar no formato (mm aaaa): ')
+                exibirHistorico(data)
+            else:
+                exibirHistorico()
